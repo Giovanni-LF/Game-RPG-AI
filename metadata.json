@@ -1,0 +1,8 @@
+{
+  "name": "Criptas del Eclipse",
+  "description": "RPG de acción 2D cenital tipo hack and slash con mazmorras procedurales, combate en tiempo real y clases híbridas personalizables.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
