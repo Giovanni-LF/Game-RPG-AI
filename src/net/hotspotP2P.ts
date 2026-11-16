@@ -1,5 +1,7 @@
+import { APP_VERSION, compareVersions } from '../shared/protocol.ts';
 import type {
   CoopClientMessage,
+  CoopHeroBuildState,
   CoopPlayerSync,
   CoopServerMessage,
 } from '../types/coop.ts';
@@ -117,6 +119,9 @@ export interface HostSetupPayload {
   weaponKind: WeaponKind;
   classTitle: string;
   maxHp: number;
+  runSeed?: number;
+  runSeedLabel?: string;
+  buildState?: CoopHeroBuildState;
 }
 
 interface GuestPeerSlot {
@@ -130,6 +135,7 @@ interface GuestPeerSlot {
 export class HotspotHostSession {
   private roomManager: CoopRoomManager;
   private hostPlayerId: string;
+  private hostSessionToken = '';
   private roomCode = '';
   private slots = new Map<string, GuestPeerSlot>();
   private tickTimer: number;
@@ -144,7 +150,8 @@ export class HotspotHostSession {
       if (peerId === 'host_local') {
         if (msg.type === 'room:joined') {
           this.roomCode = msg.roomCode;
-          if (!this.hasEnteredGame) return; // Wait until host clicks "Entrar a la Cripta"
+          this.hostSessionToken = msg.sessionToken;
+          if (!this.hasEnteredGame) return;
         }
         if (
           msg.type === 'player:joined' ||
@@ -159,7 +166,6 @@ export class HotspotHostSession {
         return;
       }
 
-      // Send over P2P DataChannel to remote guest
       for (const slot of this.slots.values()) {
         if (slot.peerId === peerId && slot.dc && slot.dc.readyState === 'open') {
           try {
@@ -175,12 +181,16 @@ export class HotspotHostSession {
     this.hostPlayerId = this.roomManager.registerPeer('host_local');
     this.roomManager.handleMessage('host_local', {
       type: 'room:create',
+      version: APP_VERSION,
       playerName: hostSetup.playerName,
       archetype: hostSetup.archetype,
       weaponKind: hostSetup.weaponKind,
       classTitle: hostSetup.classTitle,
       maxHp: hostSetup.maxHp,
       isPublic: false,
+      runSeed: hostSetup.runSeed,
+      runSeedLabel: hostSetup.runSeedLabel,
+      buildState: hostSetup.buildState,
     });
 
     this.tickTimer = window.setInterval(() => {
@@ -194,9 +204,13 @@ export class HotspotHostSession {
     return this.roomCode;
   }
 
+  getRunSeedLabel(): string {
+    return this.roomManager.getRoomSnapshot(this.roomCode)?.runSeedLabel ?? '';
+  }
+
   getPlayers(): CoopPlayerSync[] {
     const room = this.roomManager.getRoomSnapshot(this.roomCode);
-    return room ? Array.from(room.players.values()) : [];
+    return room ? Array.from(room.players.values()).map((r) => r.sync) : [];
   }
 
   async createInviteOffer(): Promise<{ slotId: string; offerToken: string; roomCode: string }> {
@@ -255,7 +269,7 @@ export class HotspotHostSession {
       throw new Error('No se pudo generar la oferta de conexión local.');
     }
 
-    const offerToken = await encodeToken('1', { s: localSdp, r: this.roomCode });
+    const offerToken = await encodeToken('1', { s: localSdp, r: this.roomCode, v: APP_VERSION });
     return { slotId, offerToken, roomCode: this.roomCode };
   }
 
@@ -276,9 +290,14 @@ export class HotspotHostSession {
       type: 'room:joined',
       roomCode: room.code,
       playerId: this.hostPlayerId,
+      sessionToken: this.hostSessionToken,
+      runSeed: room.runSeed,
+      runSeedLabel: room.runSeedLabel,
       floorNumber: room.floorNumber,
       floorSeed: room.floorSeed,
-      players: Array.from(room.players.values()),
+      serverVersion: APP_VERSION,
+      compatibility: compareVersions(APP_VERSION, APP_VERSION),
+      players: Array.from(room.players.values()).map((r) => r.sync),
       enemies: room.enemies.map((e) => ({
         id: e.id,
         type: e.type,
@@ -298,6 +317,7 @@ export class HotspotHostSession {
         telegraph: e.telegraph,
         roomId: e.roomId,
       })),
+      groundLoot: room.groundLoot.map((l) => structuredClone(l)),
       interactedPropIds: Array.from(room.interactedPropIds),
       brokenPropIds: Array.from(room.brokenPropIds),
       portalOpen: room.portalOpen,
@@ -363,9 +383,16 @@ export class HotspotGuestSession {
   ): Promise<{ answerToken: string; roomCode: string }> {
     this.destroy();
 
-    const parsed = await decodeToken<{ s: string; r: string }>(offerToken, '1');
+    const parsed = await decodeToken<{ s: string; r: string; v?: string }>(offerToken, '1');
+    if (parsed.v) {
+      const check = compareVersions(APP_VERSION, parsed.v);
+      if (!check.compatible) {
+        throw new Error(check.message || 'Versión mayor incompatible con el anfitrión Hotspot.');
+      }
+    }
+
     this.roomCode = parsed.r;
-    this.joinPayloadOnOpen = joinSetup;
+    this.joinPayloadOnOpen = { ...joinSetup, version: APP_VERSION };
 
     const pc = new RTCPeerConnection({ iceServers: [] });
     this.pc = pc;
@@ -375,6 +402,7 @@ export class HotspotGuestSession {
       this.dc = dc;
       dc.onopen = () => {
         this.emitStatus(true);
+        this.send({ type: 'client:hello', version: APP_VERSION });
         if (this.joinPayloadOnOpen) {
           this.send({
             type: 'room:join',
@@ -419,7 +447,7 @@ export class HotspotGuestSession {
       throw new Error('No se pudo generar la respuesta de conexión local.');
     }
 
-    const answerToken = await encodeToken('2', { s: localSdp });
+    const answerToken = await encodeToken('2', { s: localSdp, v: APP_VERSION });
     return { answerToken, roomCode: this.roomCode };
   }
 

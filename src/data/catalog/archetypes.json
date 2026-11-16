@@ -1,0 +1,98 @@
+{
+  "crusader": {
+    "id": "crusader",
+    "name": "Cruzado de Hierro",
+    "subtitle": "Vanguardia · Acero y Bastión",
+    "description": "Guerrero acorazado que barre hordas con amplios tajos de espadón y resiste embestidas mediante escudos óseos.",
+    "primaryBranch": "steel",
+    "accentColor": "#DC2626",
+    "startingNodeId": "steel_1",
+    "startingSkills": ["whirlwind", "aegis", null],
+    "startingWeapon": {
+      "id": "starter_greatsword",
+      "name": "Espadón de Hierro Frío",
+      "slot": "weapon",
+      "weaponKind": "greatsword",
+      "rarity": "common",
+      "level": 1,
+      "description": "Hoja ancha de acero templado con gran arco de barrido.",
+      "stats": { "damageBonus": 12, "maxHpBonus": 20 },
+      "valueGold": 25
+    },
+    "baseStats": {
+      "maxHp": 150,
+      "maxMana": 65,
+      "armor": 14,
+      "moveSpeed": 215,
+      "baseDamage": 24,
+      "arcanePower": 10,
+      "attackSpeed": 1.0,
+      "critChance": 0.1,
+      "critMultiplier": 1.65
+    }
+  },
+  "stalker": {
+    "id": "stalker",
+    "name": "Acechador Sombrío",
+    "subtitle": "Letalidad · Sombra y Crítico",
+    "description": "Asesino ágil de las criptas que encadena golpes críticos veloces, hemorragias y desplazamientos entre sombras.",
+    "primaryBranch": "shadow",
+    "accentColor": "#10B981",
+    "startingNodeId": "shadow_1",
+    "startingSkills": ["shadow_step", "dagger_fan", null],
+    "startingWeapon": {
+      "id": "starter_daggers",
+      "name": "Dagas Gemelas de Ceniza",
+      "slot": "weapon",
+      "weaponKind": "daggers",
+      "rarity": "common",
+      "level": 1,
+      "description": "Cuchillas ligeras ideales para ráfagas rápidas y estocadas críticas.",
+      "stats": { "damageBonus": 8, "attackSpeedBonus": 0.25, "critChanceBonus": 0.08 },
+      "valueGold": 25
+    },
+    "baseStats": {
+      "maxHp": 115,
+      "maxMana": 75,
+      "armor": 6,
+      "moveSpeed": 248,
+      "baseDamage": 20,
+      "arcanePower": 14,
+      "attackSpeed": 1.22,
+      "critChance": 0.18,
+      "critMultiplier": 1.85
+    }
+  },
+  "occultist": {
+    "id": "occultist",
+    "name": "Ocultista Abisal",
+    "subtitle": "Arcano · Vacío y Drenaje",
+    "description": "Erudito de artes prohibidas que desata lanzas perforantes del abismo, novas eclipsadas y drenaje vital.",
+    "primaryBranch": "arcane",
+    "accentColor": "#8B5CF6",
+    "startingNodeId": "arcane_1",
+    "startingSkills": ["abyss_lance", "eclipse_nova", null],
+    "startingWeapon": {
+      "id": "starter_staff",
+      "name": "Báculo de Obsidiana",
+      "slot": "weapon",
+      "weaponKind": "staff",
+      "rarity": "common",
+      "level": 1,
+      "description": "Canaliza energía del vacío en descargas arcanas a distancia.",
+      "stats": { "damageBonus": 7, "arcaneBonus": 14, "maxManaBonus": 20 },
+      "valueGold": 25
+    },
+    "baseStats": {
+      "maxHp": 105,
+      "maxMana": 115,
+      "armor": 5,
+      "moveSpeed": 224,
+      "baseDamage": 16,
+      "arcanePower": 26,
+      "attackSpeed": 1.05,
+      "critChance": 0.12,
+      "critMultiplier": 1.7
+    }
+  }
+}

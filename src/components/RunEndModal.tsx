@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Check, Save } from 'lucide-react';
 import { HudSnapshot } from '../types/game';
 
 interface RunEndModalProps {
   hud: HudSnapshot;
   onResume: () => void;
   onContinueEndless: () => void;
+  onSaveRun?: () => boolean;
+  onSaveAndReturnTitle?: () => void;
+  onOpenBestiary?: () => void;
+  onOpenAchievements?: () => void;
   onRestart: () => void;
   onReturnTitle: () => void;
 }
@@ -13,17 +18,26 @@ export const RunEndModal: React.FC<RunEndModalProps> = ({
   hud,
   onResume,
   onContinueEndless,
+  onSaveRun,
+  onSaveAndReturnTitle,
+  onOpenBestiary,
+  onOpenAchievements,
   onRestart,
   onReturnTitle,
 }) => {
+  const [savedNotice, setSavedNotice] = useState(false);
+
   const isPause = hud.screen === 'PAUSED';
   const isVictory = hud.screen === 'VICTORY';
-  const isOnlineCoop = Boolean(hud.coop);
-  const isLocalCoop = Boolean(hud.localP2);
+  const isPvp = Boolean(hud.pvp);
+  const isOnlineCoop = Boolean(hud.coop) && !isPvp;
+  const isLocalCoop = Boolean(hud.localP2) && !isPvp;
   const isAnyCoop = isOnlineCoop || isLocalCoop;
 
   const title = isPause
-    ? isOnlineCoop
+    ? isPvp
+      ? 'Arena Competitiva Pausada'
+      : isOnlineCoop
       ? 'Menú de Sala'
       : isLocalCoop
       ? 'Cooperativo Local Pausado'
@@ -35,14 +49,27 @@ export const RunEndModal: React.FC<RunEndModalProps> = ({
     : 'Has Caído en la Cripta';
 
   const subtitle = isPause
-    ? isOnlineCoop
+    ? isPvp
+      ? hud.pvp?.mode === 'online'
+        ? `Sala PvP #${hud.pvp.roomCode} · El duelo en red continúa en tiempo real mientras este menú está abierto.`
+        : 'El duelo local está pausado. Puedes reanudar el combate o regresar al Santuario.'
+      : isOnlineCoop
       ? `Sala #${hud.coop?.roomCode} · El combate cooperativo continúa en tiempo real mientras gestionas tu menú.`
       : isLocalCoop
-      ? 'Ambos héroes aguardan en la penumbra de la cripta.'
-      : 'El eco de la batalla aguarda tu regreso.'
+      ? 'Ambos héroes aguardan en la penumbra de la cripta. Puedes guardar y continuar más tarde.'
+      : 'El eco de la batalla aguarda tu regreso. Tu progreso se guarda en el almacenamiento local.'
     : isVictory
     ? 'Has superado el tercer sello del eclipse. Puedes descender al abismo infinito o asegurar tus Fragmentos de Alma.'
     : 'Tu espíritu regresa al Altar Eterno con los Fragmentos de Alma recolectados.';
+
+  const handleSaveNow = () => {
+    if (!onSaveRun) return;
+    const ok = onSaveRun();
+    if (ok) {
+      setSavedNotice(true);
+      window.setTimeout(() => setSavedNotice(false), 2400);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
@@ -72,6 +99,7 @@ export const RunEndModal: React.FC<RunEndModalProps> = ({
             <div className="text-[#949BA8]">Piso alcanzado</div>
             <div className="font-mono-num font-semibold text-[#E5E0D5] mt-0.5">
               Piso {hud.floorNumber} · Nv. {hud.level}
+              {hud.runSeedLabel ? ` · ${hud.runSeedLabel}` : ''}
             </div>
           </div>
           <div className="p-3 rounded bg-[#181C26] border border-[#232836]">
@@ -99,6 +127,47 @@ export const RunEndModal: React.FC<RunEndModalProps> = ({
               Reanudar Combate
             </button>
           )}
+          {isPause && !isOnlineCoop && !isPvp && onSaveRun && (
+            <button
+              type="button"
+              onClick={handleSaveNow}
+              className="w-full min-h-[46px] py-2.5 bg-[#18202D] hover:bg-[#202B3D] text-[#E5E0D5] border border-emerald-500/50 font-semibold text-sm rounded-md transition-colors cursor-pointer inline-flex items-center justify-center gap-2"
+            >
+              {savedNotice ? (
+                <>
+                  <Check className="w-4 h-4 text-emerald-400" />
+                  <span className="text-emerald-300">Partida Guardada</span>
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 text-emerald-400" />
+                  <span>Guardar Partida Ahora</span>
+                </>
+              )}
+            </button>
+          )}
+          {isPause && !isPvp && (onOpenBestiary || onOpenAchievements) && (
+            <div className="grid grid-cols-2 gap-2">
+              {onOpenBestiary && (
+                <button
+                  type="button"
+                  onClick={onOpenBestiary}
+                  className="min-h-[44px] px-2.5 py-2 bg-[#18161E] hover:bg-[#231F2C] text-[#E5E0D5] border border-red-500/45 text-xs font-semibold rounded-md transition-colors cursor-pointer"
+                >
+                  Bestiario
+                </button>
+              )}
+              {onOpenAchievements && (
+                <button
+                  type="button"
+                  onClick={onOpenAchievements}
+                  className="min-h-[44px] px-2.5 py-2 bg-[#1A1813] hover:bg-[#252119] text-amber-200 border border-amber-500/45 text-xs font-semibold rounded-md transition-colors cursor-pointer"
+                >
+                  Logros
+                </button>
+              )}
+            </div>
+          )}
           {isVictory && (
             <button
               type="button"
@@ -108,7 +177,7 @@ export const RunEndModal: React.FC<RunEndModalProps> = ({
               Descender al Abismo Infinito (Piso {hud.floorNumber + 1})
             </button>
           )}
-          {!isOnlineCoop && (
+          {!isOnlineCoop && !isPvp && (
             <button
               type="button"
               onClick={onRestart}
@@ -123,13 +192,20 @@ export const RunEndModal: React.FC<RunEndModalProps> = ({
           )}
           <button
             type="button"
-            onClick={onReturnTitle}
+            onClick={isPause && !isOnlineCoop && !isPvp && onSaveAndReturnTitle ? onSaveAndReturnTitle : onReturnTitle}
             className="w-full min-h-[44px] py-2.5 bg-[#12151C] hover:bg-[#181C26] text-[#949BA8] hover:text-[#E5E0D5] border border-[#232836] text-xs font-medium rounded-md transition-colors cursor-pointer"
           >
-            {isOnlineCoop ? 'Abandonar Sala y Volver al Santuario' : 'Volver al Santuario Inicial'}
+            {isPvp
+              ? 'Abandonar Arena y Volver al Santuario'
+              : isOnlineCoop
+              ? 'Abandonar Sala y Volver al Santuario'
+              : isPause
+              ? 'Guardar y Volver al Santuario'
+              : 'Volver al Santuario Inicial'}
           </button>
         </div>
       </div>
     </div>
   );
 };
+

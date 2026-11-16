@@ -12,8 +12,8 @@ class SoundEngine {
     return this.muted;
   }
 
-  private ensureContext(): AudioContext | null {
-    if (this.muted) return null;
+  getAudioContext(forceCreate = false): AudioContext | null {
+    if (this.muted && !forceCreate) return null;
     if (!this.ctx && typeof window !== 'undefined') {
       const AudioCtx =
         window.AudioContext ||
@@ -22,10 +22,14 @@ class SoundEngine {
         this.ctx = new AudioCtx();
       }
     }
-    if (this.ctx && this.ctx.state === 'suspended') {
+    if (this.ctx && this.ctx.state === 'suspended' && !this.muted) {
       this.ctx.resume().catch(() => {});
     }
     return this.ctx;
+  }
+
+  private ensureContext(): AudioContext | null {
+    return this.getAudioContext(false);
   }
 
   private tone(

@@ -64,3 +64,79 @@ body,
 .crypt-scroll::-webkit-scrollbar-thumb:hover {
   background: #475066;
 }
+
+@keyframes rankUpAura {
+  0%, 100% {
+    opacity: 0.72;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+}
+
+@keyframes rankCrestRise {
+  0% {
+    opacity: 0.2;
+    transform: scale(0.76) translateY(6px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.1) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes rankShimmerSweep {
+  0% {
+    transform: translateX(-140%) skewX(-18deg);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.55;
+  }
+  75% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translateX(240%) skewX(-18deg);
+    opacity: 0;
+  }
+}
+
+.rank-up-glow-card {
+  position: relative;
+  overflow: hidden;
+  animation: rankUpAura 2.1s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.rank-up-crest-anim {
+  animation: rankCrestRise 0.65s cubic-bezier(0.16, 1, 0.3, 1) 1;
+}
+
+.rank-up-shimmer {
+  position: absolute;
+  inset: 0;
+  width: 45%;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.16) 50%,
+    transparent 100%
+  );
+  animation: rankShimmerSweep 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rank-up-glow-card,
+  .rank-up-crest-anim,
+  .rank-up-shimmer {
+    animation: none !important;
+  }
+}
+

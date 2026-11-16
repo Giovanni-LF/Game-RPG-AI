@@ -1,0 +1,197 @@
+{
+  "floorNames": [
+    "Cripta Exterior",
+    "Osario Sumergido",
+    "Claustro del Eclipse",
+    "Catacumbas de Basalto",
+    "Santuario del Vacío",
+    "Bóveda de Ceniza",
+    "Panteón de Hierro",
+    "Abismo de Obsidiana",
+    "Cámara del Ocaso",
+    "Trono del Eclipse Eterno"
+  ],
+  "scaling": {
+    "floorFactor": 0.36,
+    "coopPlayerFactor": 0.35
+  },
+  "bossScaling": {
+    "hpPerFloor": 0.52,
+    "hpCompoundPerFloor": 0.14,
+    "damagePerFloor": 0.25,
+    "speedPerFloor": 0.06,
+    "maxSpeedMultiplier": 1.65,
+    "cooldownReductionPerFloor": 0.08,
+    "minCooldownMultiplier": 0.5,
+    "telegraphSpeedupPerFloor": 0.055,
+    "minTelegraphMultiplier": 0.62,
+    "extraOrbsPerFloor": 2,
+    "maxBonusOrbs": 12,
+    "slamRadiusPerFloor": 10,
+    "maxBonusSlamRadius": 60,
+    "xpPerFloor": 0.45,
+    "goldPerFloor": 0.4
+  },
+  "enemies": {
+    "skeleton": {
+      "type": "skeleton",
+      "name": "Esqueleto Errante",
+      "isBoss": false,
+      "baseHp": 56,
+      "radius": 14,
+      "speed": 118,
+      "damage": 14,
+      "xpValue": 24,
+      "goldValue": 6,
+      "initialCooldown": 0.4,
+      "aggroRange": 360
+    },
+    "cultist": {
+      "type": "cultist",
+      "name": "Cultista del Eclipse",
+      "isBoss": false,
+      "baseHp": 48,
+      "radius": 14,
+      "speed": 88,
+      "damage": 16,
+      "xpValue": 28,
+      "goldValue": 8,
+      "initialCooldown": 0.8,
+      "aggroRange": 360
+    },
+    "golem": {
+      "type": "golem",
+      "name": "Gólem de Basalto",
+      "isBoss": false,
+      "baseHp": 130,
+      "radius": 21,
+      "speed": 68,
+      "damage": 24,
+      "xpValue": 45,
+      "goldValue": 14,
+      "initialCooldown": 1.0,
+      "aggroRange": 360
+    },
+    "wraith": {
+      "type": "wraith",
+      "name": "Espectro Umbrío",
+      "isBoss": false,
+      "baseHp": 64,
+      "radius": 14,
+      "speed": 138,
+      "damage": 18,
+      "xpValue": 32,
+      "goldValue": 10,
+      "initialCooldown": 0.6,
+      "aggroRange": 360
+    },
+    "boss_warden": {
+      "type": "boss_warden",
+      "name": "Alcaide Osario, Guardián de Hierro",
+      "isBoss": true,
+      "baseHp": 540,
+      "radius": 27,
+      "speed": 96,
+      "damage": 28,
+      "xpValue": 150,
+      "goldValue": 60,
+      "initialCooldown": 1.1,
+      "aggroRange": 520
+    },
+    "boss_archon": {
+      "type": "boss_archon",
+      "name": "Arconte del Eclipse",
+      "isBoss": true,
+      "baseHp": 620,
+      "radius": 26,
+      "speed": 105,
+      "damage": 30,
+      "xpValue": 180,
+      "goldValue": 75,
+      "initialCooldown": 1.0,
+      "aggroRange": 520
+    }
+  },
+  "bestiary": {
+    "skeleton": {
+      "type": "skeleton",
+      "title": "Centinela de Hueso",
+      "faction": "Legión del Osario",
+      "dangerRank": "Común",
+      "accentColor": "#D4CFC4",
+      "lore": "Antiguos soldados sepultados bajo la primera cripta. Su acero oxidado aún responde al eco de la campana del eclipse.",
+      "abilities": [
+        "Tajo frontal con arco telegrafiado de corto alcance",
+        "Persecución constante en grupo para acorralar"
+      ],
+      "weakness": "Velocidad moderada y telégrafo amplio; fácil de flanquear tras esquivar."
+    },
+    "cultist": {
+      "type": "cultist",
+      "title": "Acólito del Velo",
+      "faction": "Orden del Eclipse",
+      "dangerRank": "Común",
+      "accentColor": "#A855F7",
+      "lore": "Eruditos que cambiaron su vista por orbes de obsidiana. Canalizan proyectiles sombríos desde la retaguardia.",
+      "abilities": [
+        "Disparo lineal de orbe arcano guiado",
+        "Mantiene distancia táctica respecto al héroe"
+      ],
+      "weakness": "Poca vida base; vulnerable a lanzas perforantes y pasos sombríos."
+    },
+    "golem": {
+      "type": "golem",
+      "title": "Coloso de Basalto",
+      "faction": "Cimientos Vivos",
+      "dangerRank": "Élite",
+      "accentColor": "#F59E0B",
+      "lore": "Monolitos ensamblados con runas volcánicas para custodiar las cámaras del tesoro. Cada impacto hace temblar la piedra.",
+      "abilities": [
+        "Golpe sísmico circular de gran radio",
+        "Alta resistencia y empuje contundente"
+      ],
+      "weakness": "Lento al desplazarse y al preparar su impacto circular."
+    },
+    "wraith": {
+      "type": "wraith",
+      "title": "Segador Espectral",
+      "faction": "Coro del Abismo",
+      "dangerRank": "Élite",
+      "accentColor": "#2DD4BF",
+      "lore": "Almas fracturadas que flotan sobre el suelo de pizarra, lanzándose en embestidas gélidas sin previo descanso.",
+      "abilities": [
+        "Embestida lineal veloz a través de la sala",
+        "Alta movilidad que dificulta mantener la distancia"
+      ],
+      "weakness": "Susceptible a ralentización, sangrado y área defensiva."
+    },
+    "boss_warden": {
+      "type": "boss_warden",
+      "title": "Guardián de los Pisos Impares",
+      "faction": "Señores del Hierro",
+      "dangerRank": "Jefe",
+      "accentColor": "#EF4444",
+      "lore": "Forjado para sellar las profundidades impares de la cripta. Su maza rúnica desata ondas expansivas que crecen con cada piso descendido.",
+      "abilities": [
+        "Impacto sísmico masivo en área ampliable por piso",
+        "Nova radial de orbes y abanicos dirigidos desde el Piso 3",
+        "Estado de Furia (<50% Vida desde el Piso 2) con ataques acelerados"
+      ],
+      "weakness": "Aprovecha las pausas de recuperación tras su salto sísmico."
+    },
+    "boss_archon": {
+      "type": "boss_archon",
+      "title": "Soberano de los Pisos Pares",
+      "faction": "Cónclave del Eclipse",
+      "dangerRank": "Jefe",
+      "accentColor": "#A78BFA",
+      "lore": "Avatar del eclipse perpetuo que rige los pisos pares. Doblega el vacío en anillos de fuego astral y andanadas crecientes hasta el infinito.",
+      "abilities": [
+        "Nova de orbes astrales multiplicada según profundidad del piso",
+        "Abanicos telegrafiados y descarga circular del vacío",
+        "Estado de Furia (<50% Vida desde el Piso 2) con aura violenta"
+      ],
+      "weakness": "Usa la esquiva en el momento exacto de la onda para atravesar los anillos."
+    }
+  }
+}

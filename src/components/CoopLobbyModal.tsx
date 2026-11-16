@@ -1,33 +1,42 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  Activity,
+  AlertTriangle,
   Check,
   Copy,
+  Dices,
   Globe,
   Lock,
   Plus,
   QrCode,
   RefreshCw,
   Server,
+  ShieldAlert,
   Smartphone,
   Users,
   Wifi,
   X,
 } from 'lucide-react';
-import { coopClient } from '../net/coopClient';
+import { coopClient, type CoopTelemetry } from '../net/coopClient';
 import {
   HostSetupPayload,
   HotspotGuestSession,
   HotspotHostSession,
 } from '../net/hotspotP2P';
+import { APP_VERSION, compareVersions } from '../shared/protocol';
 import type { CoopPlayerSync, CoopRoomSummary } from '../types/coop';
 import { QrCodeBox } from './QrCodeBox';
 
 interface CoopLobbyModalProps {
   playerName: string;
   onChangePlayerName: (name: string) => void;
+  runSeedLabel: string;
+  onChangeRunSeed: (val: string) => void;
+  onRandomizeRunSeed: () => void;
   rooms: CoopRoomSummary[];
   loadingRooms: boolean;
   wsConnected: boolean;
+  coopTelemetry: CoopTelemetry;
   errorMessage: string | null;
   initialJoinCode?: string;
   getHostPayload: () => HostSetupPayload;
@@ -38,6 +47,7 @@ interface CoopLobbyModalProps {
 }
 
 interface LanInfoResponse {
+  version?: string;
   port: number;
   ips: string[];
   urls: string[];
@@ -46,9 +56,13 @@ interface LanInfoResponse {
 export const CoopLobbyModal: React.FC<CoopLobbyModalProps> = ({
   playerName,
   onChangePlayerName,
+  runSeedLabel,
+  onChangeRunSeed,
+  onRandomizeRunSeed,
   rooms,
   loadingRooms,
   wsConnected,
+  coopTelemetry,
   errorMessage,
   initialJoinCode = '',
   getHostPayload,
@@ -64,6 +78,7 @@ export const CoopLobbyModal: React.FC<CoopLobbyModalProps> = ({
   const [joinCode, setJoinCode] = useState(initialJoinCode);
   const [serverInput, setServerInput] = useState<string>(() => coopClient.getServerOverride());
   const [lanUrls, setLanUrls] = useState<string[]>([]);
+  const [lanServerVersion, setLanServerVersion] = useState<string | null>(null);
   const [showServerQr, setShowServerQr] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
@@ -93,19 +108,23 @@ export const CoopLobbyModal: React.FC<CoopLobbyModalProps> = ({
     }
   }, [initialJoinCode]);
 
-  // Fetch LAN/Hotspot IP info from Node server if reachable
+  // Fetch LAN/Hotspot IP info & server version from Node server if reachable
   useEffect(() => {
     let cancelled = false;
     const base = coopClient.getHttpBaseUrl();
     fetch(`${base}/api/lan-info`)
       .then((r) => (r.ok ? r.json() : null))
       .then((data: LanInfoResponse | null) => {
-        if (!cancelled && data?.urls) {
-          setLanUrls(data.urls);
+        if (!cancelled && data) {
+          setLanUrls(data.urls ?? []);
+          setLanServerVersion(data.version ?? null);
         }
       })
       .catch(() => {
-        if (!cancelled) setLanUrls([]);
+        if (!cancelled) {
+          setLanUrls([]);
+          setLanServerVersion(null);
+        }
       });
     return () => {
       cancelled = true;
@@ -132,6 +151,13 @@ export const CoopLobbyModal: React.FC<CoopLobbyModalProps> = ({
     }, 1800);
   };
 
+  const hostSeedLabel = hostSessionRef.current?.getRunSeedLabel() || runSeedLabel;
+
+  const effectiveVersionCheck =
+    coopTelemetry.versionCheck ??
+    (lanServerVersion ? compareVersions(APP_VERSION, lanServerVersion) : null);
+  const versionBlocked = effectiveVersionCheck?.status === 'major_mismatch';
+
   const handleApplyServerUrl = (e: React.FormEvent) => {
     e.preventDefault();
     coopClient.setServerOverride(serverInput);
@@ -146,6 +172,7 @@ export const CoopLobbyModal: React.FC<CoopLobbyModalProps> = ({
 
   const handleJoinSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (versionBlocked) return;
     const cleaned = joinCode.trim().toUpperCase();
     if (!cleaned) return;
     onJoinRoom(cleaned);
@@ -323,15 +350,37 @@ export const CoopLobbyModal: React.FC<CoopLobbyModalProps> = ({
               {/* LAN / Hotspot Server Discovery & Custom IP */}
               <div className="p-3.5 rounded-lg bg-[#151923] border border-[#262C3C] space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <Wifi
-                      className={`w-4 h-4 ${wsConnected ? 'text-emerald-400' : 'text-[#949BA8]'}`}
-                    />
-                    <span className="text-xs font-semibold text-[#E5E0D5]">
-                      {wsConnected
-                        ? 'Servidor local conectado'
-                        : 'Sin enlace con servidor WebSocket'}
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <div className="flex items-center gap-2">
+                      <Wifi
+                        className={`w-4 h-4 ${wsConnected ? 'text-emerald-400' : 'text-[#949BA8]'}`}
+                      />
+                      <span className="text-xs font-semibold text-[#E5E0D5]">
+                        {wsConnected
+                          ? 'Servidor local conectado'
+                          : 'Sin enlace con servidor WebSocket'}
+                      </span>
+                    </div>
+                    <span className="font-mono-num text-[11px] text-[#949BA8]">
+                      Cliente v{APP_VERSION}
+                      {effectiveVersionCheck?.serverVersion
+                        ? ` · Servidor v${effectiveVersionCheck.serverVersion}`
+                        : ''}
                     </span>
+                    {wsConnected && coopTelemetry.latencyMs !== null && (
+                      <span
+                        className={`inline-flex items-center gap-1 font-mono-num text-[11px] ${
+                          coopTelemetry.latencyMs < 70
+                            ? 'text-emerald-400'
+                            : coopTelemetry.latencyMs <= 150
+                            ? 'text-amber-300'
+                            : 'text-red-400'
+                        }`}
+                      >
+                        <Activity className="w-3.5 h-3.5" />
+                        <span>{coopTelemetry.latencyMs} ms</span>
+                      </span>
+                    )}
                   </div>
                   {primaryLanShareUrl && (
                     <button
@@ -344,6 +393,26 @@ export const CoopLobbyModal: React.FC<CoopLobbyModalProps> = ({
                     </button>
                   )}
                 </div>
+
+                {effectiveVersionCheck?.status === 'major_mismatch' && (
+                  <div className="p-2.5 rounded bg-red-950/60 border border-red-700/80 text-xs text-red-200 flex items-start gap-2">
+                    <ShieldAlert className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                    <span>
+                      {effectiveVersionCheck.message ||
+                        `Versión mayor incompatible (Cliente v${APP_VERSION}, Servidor v${effectiveVersionCheck.serverVersion}). Actualiza antes de crear o unirte.`}
+                    </span>
+                  </div>
+                )}
+
+                {effectiveVersionCheck?.status === 'minor_mismatch' && (
+                  <div className="p-2.5 rounded bg-amber-950/45 border border-amber-700/60 text-xs text-amber-200 flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <span>
+                      {effectiveVersionCheck.message ||
+                        `Diferencia menor de versión (Cliente v${APP_VERSION}, Servidor v${effectiveVersionCheck.serverVersion}). Compatible.`}
+                    </span>
+                  </div>
+                )}
 
                 {lanUrls.length > 0 && (
                   <div className="space-y-1.5">
@@ -448,9 +517,46 @@ export const CoopLobbyModal: React.FC<CoopLobbyModalProps> = ({
                     </button>
                   </div>
 
+                  <div className="space-y-1">
+                    <label htmlFor="coop-lan-seed" className="block text-[11px] text-[#949BA8]">
+                      Semilla compartida
+                    </label>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        id="coop-lan-seed"
+                        type="text"
+                        maxLength={24}
+                        value={runSeedLabel}
+                        onChange={(e) => onChangeRunSeed(e.target.value)}
+                        placeholder="ECLIPSE-XXXX"
+                        className="flex-1 min-w-0 min-h-[40px] px-2.5 py-1 rounded bg-[#0C0E13] border border-[#2C3344] focus:border-amber-500/80 focus:outline-none text-xs font-mono-num uppercase text-amber-300"
+                      />
+                      <button
+                        type="button"
+                        onClick={onRandomizeRunSeed}
+                        aria-label="Semilla aleatoria"
+                        className="min-w-[40px] min-h-[40px] flex items-center justify-center rounded bg-[#10131A] border border-[#2C3344] hover:border-amber-500/70 text-amber-400 cursor-pointer"
+                      >
+                        <Dices className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => copyText('lan-seed', runSeedLabel)}
+                        aria-label="Copiar semilla"
+                        className="min-w-[40px] min-h-[40px] flex items-center justify-center rounded bg-[#10131A] border border-[#2C3344] hover:border-amber-500/70 text-[#949BA8] cursor-pointer"
+                      >
+                        {copiedKey === 'lan-seed' ? (
+                          <Check className="w-4 h-4 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
                   <button
                     type="button"
-                    disabled={!wsConnected}
+                    disabled={!wsConnected || versionBlocked}
                     onClick={() => onCreateRoom(isPublic)}
                     className="w-full min-h-[46px] py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-45 disabled:cursor-not-allowed active:bg-amber-400 text-[#0B0C10] font-semibold text-sm rounded-md transition-colors cursor-pointer"
                   >
@@ -480,7 +586,7 @@ export const CoopLobbyModal: React.FC<CoopLobbyModalProps> = ({
                   </div>
                   <button
                     type="submit"
-                    disabled={!wsConnected || !joinCode.trim()}
+                    disabled={!wsConnected || versionBlocked || !joinCode.trim()}
                     className="w-full min-h-[46px] py-2.5 bg-[#202636] hover:bg-[#293145] disabled:opacity-45 disabled:cursor-not-allowed text-[#E5E0D5] border border-[#384158] font-semibold text-sm rounded-md transition-colors cursor-pointer"
                   >
                     Unirse a la Sala
@@ -530,12 +636,12 @@ export const CoopLobbyModal: React.FC<CoopLobbyModalProps> = ({
                             </span>
                           </div>
                           <div className="text-xs text-[#949BA8] font-mono-num mt-0.5">
-                            Piso {room.floorNumber} · {room.playerCount}/{room.maxPlayers} jugadores
+                            Piso {room.floorNumber} · {room.playerCount}/{room.maxPlayers} jugadores · Semilla {room.runSeedLabel}
                           </div>
                         </div>
                         <button
                           type="button"
-                          disabled={room.playerCount >= room.maxPlayers}
+                          disabled={versionBlocked || room.playerCount >= room.maxPlayers}
                           onClick={() => onJoinRoom(room.code)}
                           className="min-h-[44px] px-4 py-2 rounded-md bg-amber-600 hover:bg-amber-500 disabled:bg-[#232836] disabled:text-[#6B7280] text-[#0B0C10] font-semibold text-xs cursor-pointer transition-colors"
                         >
@@ -586,8 +692,32 @@ export const CoopLobbyModal: React.FC<CoopLobbyModalProps> = ({
                   {!hostRoomCode ? (
                     <div className="space-y-3 text-center">
                       <p className="text-xs text-[#C2BDB2]">
-                        Tu navegador actuará como servidor local de la sala para todos los dispositivos conectados a tu Hotspot o Wi-Fi.
+                        Tu navegador actuará como servidor local de la sala para todos los dispositivos conectados a tu Hotspot o Wi-Fi (v{APP_VERSION}).
                       </p>
+                      <div className="text-left space-y-1">
+                        <label htmlFor="coop-p2p-seed" className="block text-[11px] text-[#949BA8]">
+                          Semilla compartida de la partida
+                        </label>
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            id="coop-p2p-seed"
+                            type="text"
+                            maxLength={24}
+                            value={runSeedLabel}
+                            onChange={(e) => onChangeRunSeed(e.target.value)}
+                            placeholder="ECLIPSE-XXXX"
+                            className="flex-1 min-w-0 min-h-[42px] px-3 py-1.5 rounded bg-[#0C0E13] border border-[#2C3344] focus:border-sky-400 focus:outline-none text-xs font-mono-num uppercase text-amber-300"
+                          />
+                          <button
+                            type="button"
+                            onClick={onRandomizeRunSeed}
+                            aria-label="Semilla aleatoria"
+                            className="min-w-[42px] min-h-[42px] flex items-center justify-center rounded bg-[#10131A] border border-[#2C3344] hover:border-sky-400 text-amber-400 cursor-pointer"
+                          >
+                            <Dices className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
                       <button
                         type="button"
                         disabled={p2pBusy}
@@ -601,7 +731,9 @@ export const CoopLobbyModal: React.FC<CoopLobbyModalProps> = ({
                     <>
                       <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-[#232836]">
                         <div>
-                          <div className="text-xs text-[#949BA8]">Sala local activa</div>
+                          <div className="text-xs text-[#949BA8]">
+                            Sala local activa · Semilla {hostSeedLabel}
+                          </div>
                           <div className="font-mono-num text-sm font-bold text-sky-300">
                             #{hostRoomCode} · {hostPlayers.length}/4 jugadores
                           </div>

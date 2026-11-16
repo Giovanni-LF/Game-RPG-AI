@@ -1,0 +1,76 @@
+{
+  "whirlwind": {
+    "id": "whirlwind",
+    "name": "Tajo Torbellino",
+    "branch": "steel",
+    "manaCost": 18,
+    "cooldown": 4.5,
+    "description": "Gira con tu arma infligiendo 185% de daño físico en 360° y empujando enemigos.",
+    "color": "#EF4444",
+    "maxRange": 130,
+    "physicalScale": 1.85,
+    "arcaneScale": 0
+  },
+  "aegis": {
+    "id": "aegis",
+    "name": "Égida de Hueso",
+    "branch": "steel",
+    "manaCost": 22,
+    "cooldown": 8.0,
+    "description": "Genera un escudo protector equivalente al 35% de tu vida máxima durante 5s y libera una onda.",
+    "color": "#F59E0B",
+    "maxRange": 135,
+    "physicalScale": 0.85,
+    "arcaneScale": 0.7,
+    "shieldHpRatio": 0.35,
+    "shieldDuration": 5.0
+  },
+  "shadow_step": {
+    "id": "shadow_step",
+    "name": "Paso de Sombra",
+    "branch": "shadow",
+    "manaCost": 16,
+    "cooldown": 4.0,
+    "description": "Teletranspórtate hacia el cursor dejando una explosión sombría y garantizando crítico en el siguiente golpe.",
+    "color": "#10B981",
+    "maxRange": 240,
+    "physicalScale": 1.25,
+    "arcaneScale": 0.8
+  },
+  "dagger_fan": {
+    "id": "dagger_fan",
+    "name": "Lluvia de Dagas",
+    "branch": "shadow",
+    "manaCost": 18,
+    "cooldown": 4.8,
+    "description": "Lanza 5 dagas en abanico que perforan ligeramente y aplican sangrado continuo.",
+    "color": "#34D399",
+    "maxRange": 460,
+    "physicalScale": 1.05,
+    "arcaneScale": 0.35
+  },
+  "abyss_lance": {
+    "id": "abyss_lance",
+    "name": "Lanza del Abismo",
+    "branch": "arcane",
+    "manaCost": 20,
+    "cooldown": 3.8,
+    "description": "Dispara un rayo perforante de energía abisal que atraviesa filas enemigas y ralentiza.",
+    "color": "#8B5CF6",
+    "maxRange": 540,
+    "physicalScale": 0.5,
+    "arcaneScale": 2.2
+  },
+  "eclipse_nova": {
+    "id": "eclipse_nova",
+    "name": "Nova del Eclipse",
+    "branch": "arcane",
+    "manaCost": 28,
+    "cooldown": 7.5,
+    "description": "Detona un anillo gravitatorio a tu alrededor que daña en área y te cura por cada enemigo golpeado.",
+    "color": "#A78BFA",
+    "maxRange": 175,
+    "physicalScale": 0.65,
+    "arcaneScale": 1.95
+  }
+}

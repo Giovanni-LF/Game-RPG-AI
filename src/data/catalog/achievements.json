@@ -1,0 +1,204 @@
+{
+  "items": [
+    {
+      "id": "ach_first_blood",
+      "name": "Primer Bautismo",
+      "description": "Abate a tu primer enemigo dentro de las criptas.",
+      "category": "combat",
+      "statKey": "totalKills",
+      "target": 1,
+      "rewardSouls": 10,
+      "accentColor": "#EF4444"
+    },
+    {
+      "id": "ach_slayer_50",
+      "name": "Segador de Osarios",
+      "description": "Abate 50 criaturas en tus incursiones.",
+      "category": "combat",
+      "statKey": "totalKills",
+      "target": 50,
+      "rewardSouls": 25,
+      "accentColor": "#EF4444"
+    },
+    {
+      "id": "ach_slayer_250",
+      "name": "Azote de la Cripta",
+      "description": "Abate 250 criaturas en total.",
+      "category": "combat",
+      "statKey": "totalKills",
+      "target": 250,
+      "rewardSouls": 60,
+      "accentColor": "#DC2626"
+    },
+    {
+      "id": "ach_warden_slain",
+      "name": "Caída del Alcaide",
+      "description": "Derrota al Alcaide Osario, Guardián de Hierro.",
+      "category": "combat",
+      "statKey": "bossWardenKills",
+      "target": 1,
+      "rewardSouls": 30,
+      "accentColor": "#F59E0B"
+    },
+    {
+      "id": "ach_archon_slain",
+      "name": "Ocaso del Arconte",
+      "description": "Derrota al Arconte del Eclipse.",
+      "category": "combat",
+      "statKey": "bossArchonKills",
+      "target": 1,
+      "rewardSouls": 45,
+      "accentColor": "#A855F7"
+    },
+    {
+      "id": "ach_floor_3",
+      "name": "Sello del Eclipse",
+      "description": "Desciende hasta el Piso 3 de la mazmorra.",
+      "category": "exploration",
+      "statKey": "bestFloor",
+      "target": 3,
+      "rewardSouls": 35,
+      "accentColor": "#F59E0B"
+    },
+    {
+      "id": "ach_floor_5",
+      "name": "Caminante del Abismo",
+      "description": "Alcanza el Piso 5 en el Abismo Infinito.",
+      "category": "exploration",
+      "statKey": "bestFloor",
+      "target": 5,
+      "rewardSouls": 65,
+      "accentColor": "#A78BFA"
+    },
+    {
+      "id": "ach_floor_10",
+      "name": "Leyenda Infinita",
+      "description": "Sobrevive hasta alcanzar el Piso 10 o superior.",
+      "category": "exploration",
+      "statKey": "bestFloor",
+      "target": 10,
+      "rewardSouls": 120,
+      "accentColor": "#FBBF24"
+    },
+    {
+      "id": "ach_shrines_5",
+      "name": "Devoto de la Penumbra",
+      "description": "Abre cofres o activa altares 5 veces en tus incursiones.",
+      "category": "exploration",
+      "statKey": "interactionsCount",
+      "target": 5,
+      "rewardSouls": 25,
+      "accentColor": "#38BDF8"
+    },
+    {
+      "id": "ach_level_5",
+      "name": "Poder Despertado",
+      "description": "Alcanza el Nivel 5 durante una incursión.",
+      "category": "mastery",
+      "statKey": "maxLevelReached",
+      "target": 5,
+      "rewardSouls": 20,
+      "accentColor": "#10B981"
+    },
+    {
+      "id": "ach_level_10",
+      "name": "Avatar de Guerra",
+      "description": "Alcanza el Nivel 10 en una incursión.",
+      "category": "mastery",
+      "statKey": "maxLevelReached",
+      "target": 10,
+      "rewardSouls": 45,
+      "accentColor": "#34D399"
+    },
+    {
+      "id": "ach_hybrid_class",
+      "name": "Senda Híbrida",
+      "description": "Forja un título de clase híbrida combinando ramas del árbol.",
+      "category": "mastery",
+      "statKey": "hybridClassesForged",
+      "target": 1,
+      "rewardSouls": 30,
+      "accentColor": "#8B5CF6"
+    },
+    {
+      "id": "ach_blessings_5",
+      "name": "Favor del Altar",
+      "description": "Consagra 5 mejoras en el Altar Eterno.",
+      "category": "mastery",
+      "statKey": "blessingsBought",
+      "target": 5,
+      "rewardSouls": 30,
+      "accentColor": "#F59E0B"
+    },
+    {
+      "id": "ach_relic_item",
+      "name": "Portador Ancestral",
+      "description": "Obtén o equipa un objeto de rareza Reliquia.",
+      "category": "collection",
+      "statKey": "relicRarityObtained",
+      "target": 1,
+      "rewardSouls": 35,
+      "accentColor": "#F59E0B"
+    },
+    {
+      "id": "ach_bestiary_all",
+      "name": "Erudito del Eclipse",
+      "description": "Avista las 6 especies registradas en el Bestiario.",
+      "category": "collection",
+      "statKey": "bestiaryDiscovered",
+      "target": 6,
+      "rewardSouls": 40,
+      "accentColor": "#F87171"
+    },
+    {
+      "id": "ach_cosmetics_6",
+      "name": "Guardián Distinguido",
+      "description": "Posee al menos 6 cosméticos desbloqueados en tu colección.",
+      "category": "collection",
+      "statKey": "cosmeticsUnlocked",
+      "target": 6,
+      "rewardSouls": 35,
+      "accentColor": "#C084FC"
+    },
+    {
+      "id": "ach_coop_pact",
+      "name": "Pacto de Sangre",
+      "description": "Adéntrate en la cripta en modo cooperativo (Local o Red).",
+      "category": "exploration",
+      "statKey": "coopRunsPlayed",
+      "target": 1,
+      "rewardSouls": 30,
+      "accentColor": "#38BDF8"
+    },
+    {
+      "id": "ach_pvp_first",
+      "name": "Bautismo de Arena",
+      "description": "Completa tu primer duelo al mejor de 3 rondas en la Arena Competitiva.",
+      "category": "combat",
+      "statKey": "pvpMatchesPlayed",
+      "target": 1,
+      "rewardSouls": 20,
+      "accentColor": "#EF4444"
+    },
+    {
+      "id": "ach_pvp_win_1",
+      "name": "Primer Triunfo",
+      "description": "Gana una serie completa en la Arena Competitiva PvP.",
+      "category": "combat",
+      "statKey": "pvpWins",
+      "target": 1,
+      "rewardSouls": 35,
+      "accentColor": "#F59E0B"
+    },
+    {
+      "id": "ach_pvp_champion",
+      "name": "Campeón del Eclipse",
+      "description": "Alcanza 1250 puntos de ELO (división Oro) en la Arena Competitiva.",
+      "category": "mastery",
+      "statKey": "pvpPeakElo",
+      "target": 1250,
+      "rewardSouls": 75,
+      "accentColor": "#A855F7"
+    }
+  ]
+}

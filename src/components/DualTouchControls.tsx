@@ -1,5 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Flame, Hand, Shield, Sparkles, Sword, Wind } from 'lucide-react';
+import { music } from '../audio/music';
 import { ACTIVE_SKILLS } from '../data/gameData';
 import { ActiveSkillId, HudSnapshot, SkillSlotKey } from '../types/game';
 
@@ -72,7 +73,8 @@ const PlayerTouchZone: React.FC<PlayerPadProps> = ({
   const [knobOffset, setKnobOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [attackPressed, setAttackPressed] = useState(false);
 
-  const maxRadius = 34;
+  const maxRadius = 32;
+  const deadZone = 0.1;
 
   const updateJoystick = (clientX: number, clientY: number) => {
     const pad = padRef.current;
@@ -88,7 +90,16 @@ const PlayerTouchZone: React.FC<PlayerPadProps> = ({
       dy = (dy / dist) * maxRadius;
     }
     setKnobOffset({ x: dx, y: dy });
-    onMove(dx / maxRadius, dy / maxRadius);
+
+    const norm = dist / maxRadius;
+    if (norm < deadZone) {
+      onMove(0, 0);
+      return;
+    }
+    const scaled = Math.min(1, (norm - deadZone) / (1 - deadZone));
+    const ux = dist > 0 ? dx / dist : 0;
+    const uy = dist > 0 ? dy / dist : 0;
+    onMove(ux * scaled, uy * scaled);
   };
 
   const resetJoystick = () => {
@@ -96,6 +107,26 @@ const PlayerTouchZone: React.FC<PlayerPadProps> = ({
     setKnobOffset({ x: 0, y: 0 });
     onMove(0, 0);
   };
+
+  const releaseAttack = () => {
+    attackPointerId.current = null;
+    setAttackPressed(false);
+    onAttackHold(false);
+  };
+
+  useEffect(() => {
+    const onBlur = () => {
+      resetJoystick();
+      releaseAttack();
+    };
+    window.addEventListener('blur', onBlur);
+    return () => {
+      window.removeEventListener('blur', onBlur);
+      onMove(0, 0);
+      onAttackHold(false);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const slots: SkillSlotKey[] = ['Q', 'E', 'R'];
 
@@ -110,7 +141,7 @@ const PlayerTouchZone: React.FC<PlayerPadProps> = ({
   }
 
   const joystickBlock = (
-    <div className="pointer-events-auto flex flex-col items-center gap-1 touch-none">
+    <div className="pointer-events-auto flex flex-col items-center gap-1 touch-none select-none">
       <span
         className="text-[10px] font-mono-num font-bold tracking-wider"
         style={{ color: accentHex }}
@@ -125,26 +156,45 @@ const PlayerTouchZone: React.FC<PlayerPadProps> = ({
         onPointerDown={(e) => {
           e.preventDefault();
           e.stopPropagation();
+          music.unlock();
           if (movePointerId.current !== null) return;
           movePointerId.current = e.pointerId;
-          e.currentTarget.setPointerCapture(e.pointerId);
+          try {
+            e.currentTarget.setPointerCapture(e.pointerId);
+          } catch {
+            // Ignore
+          }
           updateJoystick(e.clientX, e.clientY);
         }}
         onPointerMove={(e) => {
           if (movePointerId.current !== e.pointerId) return;
+          e.preventDefault();
           updateJoystick(e.clientX, e.clientY);
         }}
         onPointerUp={(e) => {
-          if (movePointerId.current === e.pointerId) resetJoystick();
+          if (movePointerId.current === e.pointerId) {
+            try {
+              if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+                e.currentTarget.releasePointerCapture(e.pointerId);
+              }
+            } catch {
+              // Ignore
+            }
+            resetJoystick();
+          }
         }}
         onPointerCancel={(e) => {
           if (movePointerId.current === e.pointerId) resetJoystick();
         }}
-        className={`relative w-24 h-24 rounded-full bg-[#0E1117]/75 border-2 ${accentBorderClass} flex items-center justify-center touch-none`}
+        onLostPointerCapture={(e) => {
+          if (movePointerId.current === e.pointerId) resetJoystick();
+        }}
+        onContextMenu={(e) => e.preventDefault()}
+        className={`relative w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[#0E1117]/75 border-2 ${accentBorderClass} flex items-center justify-center touch-none`}
       >
-        <div className="w-12 h-12 rounded-full border border-[#2C3344]/70 pointer-events-none" />
+        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-[#2C3344]/70 pointer-events-none" />
         <div
-          className="absolute w-10 h-10 rounded-full bg-[#242B3B]/95 border-2 shadow-md pointer-events-none"
+          className="absolute w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#242B3B]/95 border-2 shadow-md pointer-events-none"
           style={{
             borderColor: accentHex,
             transform: `translate(${knobOffset.x}px, ${knobOffset.y}px)`,
@@ -156,9 +206,10 @@ const PlayerTouchZone: React.FC<PlayerPadProps> = ({
 
   const actionsBlock = (
     <div
+      onContextMenu={(e) => e.preventDefault()}
       className={`pointer-events-auto flex flex-col ${
         alignRight ? 'items-end' : 'items-start'
-      } gap-1.5 touch-none`}
+      } gap-1.5 touch-none select-none`}
     >
       {nearbyPrompt && (
         <button
@@ -166,26 +217,28 @@ const PlayerTouchZone: React.FC<PlayerPadProps> = ({
           onPointerDown={(e) => {
             e.preventDefault();
             e.stopPropagation();
+            music.unlock();
             onInteract();
           }}
-          className="min-h-[44px] px-3 py-1.5 rounded-full bg-amber-500 active:bg-amber-400 text-[#0B0C10] font-semibold text-[11px] flex items-center gap-1.5 shadow border border-amber-300"
+          className="min-h-[40px] max-w-[140px] px-2.5 py-1.5 rounded-md bg-amber-500 active:bg-amber-400 text-[#0B0C10] font-semibold text-[11px] flex items-center gap-1.5 shadow border border-amber-300 touch-none"
         >
-          <Hand className="w-3.5 h-3.5" />
-          <span>{nearbyPrompt.replace(/^\[[A-Z]\]\s*/, '')}</span>
+          <Hand className="w-3.5 h-3.5 shrink-0" />
+          <span className="truncate">{nearbyPrompt.replace(/^\[[A-Z]\]\s*/, '')}</span>
         </button>
       )}
 
       {/* Compact Flask + Skills */}
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-1 sm:gap-1.5">
         <button
           type="button"
           aria-label={`Frasco ${label}`}
           onPointerDown={(e) => {
             e.preventDefault();
             e.stopPropagation();
+            music.unlock();
             onFlask();
           }}
-          className={`min-w-[44px] min-h-[44px] w-11 h-11 rounded-full border flex flex-col items-center justify-center active:scale-95 ${
+          className={`min-w-[40px] min-h-[40px] w-10 h-10 sm:w-11 sm:h-11 rounded-full border flex flex-col items-center justify-center active:scale-95 touch-none ${
             flaskCharges > 0
               ? 'bg-[#211317]/90 border-red-600/80 text-red-200'
               : 'bg-[#12151C]/75 border-[#2C3344] text-[#6B7280]'
@@ -213,9 +266,10 @@ const PlayerTouchZone: React.FC<PlayerPadProps> = ({
               onPointerDown={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                music.unlock();
                 if (skill) onSkill(slot);
               }}
-              className={`relative min-w-[44px] min-h-[44px] w-11 h-11 rounded-full border flex flex-col items-center justify-center overflow-hidden active:scale-95 ${
+              className={`relative min-w-[40px] min-h-[40px] w-10 h-10 sm:w-11 sm:h-11 rounded-full border flex flex-col items-center justify-center overflow-hidden active:scale-95 touch-none ${
                 !skill
                   ? 'bg-[#10131A]/70 border-[#222836] text-[#475066]'
                   : noMana
@@ -239,16 +293,17 @@ const PlayerTouchZone: React.FC<PlayerPadProps> = ({
       </div>
 
       {/* Dash + Attack */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 sm:gap-2">
         <button
           type="button"
           aria-label={`Esquivar ${label}`}
           onPointerDown={(e) => {
             e.preventDefault();
             e.stopPropagation();
+            music.unlock();
             onDash();
           }}
-          className="relative min-w-[46px] min-h-[46px] w-12 h-12 rounded-full bg-[#161B26]/90 border-2 border-[#3E4861] active:border-amber-400 flex flex-col items-center justify-center overflow-hidden active:scale-95"
+          className="relative min-w-[44px] min-h-[44px] w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#161B26]/90 border-2 border-[#3E4861] active:border-amber-400 flex flex-col items-center justify-center overflow-hidden active:scale-95 touch-none"
         >
           {dashCooldownRemaining > 0 && (
             <div
@@ -270,26 +325,35 @@ const PlayerTouchZone: React.FC<PlayerPadProps> = ({
           onPointerDown={(e) => {
             e.preventDefault();
             e.stopPropagation();
+            music.unlock();
             attackPointerId.current = e.pointerId;
-            e.currentTarget.setPointerCapture(e.pointerId);
+            try {
+              e.currentTarget.setPointerCapture(e.pointerId);
+            } catch {
+              // Ignore
+            }
             setAttackPressed(true);
             onAttackHold(true);
           }}
           onPointerUp={(e) => {
             if (attackPointerId.current === e.pointerId) {
-              attackPointerId.current = null;
-              setAttackPressed(false);
-              onAttackHold(false);
+              try {
+                if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+                  e.currentTarget.releasePointerCapture(e.pointerId);
+                }
+              } catch {
+                // Ignore
+              }
+              releaseAttack();
             }
           }}
           onPointerCancel={(e) => {
-            if (attackPointerId.current === e.pointerId) {
-              attackPointerId.current = null;
-              setAttackPressed(false);
-              onAttackHold(false);
-            }
+            if (attackPointerId.current === e.pointerId) releaseAttack();
           }}
-          className={`min-w-[54px] min-h-[54px] w-14 h-14 rounded-full border-2 flex flex-col items-center justify-center transition-transform ${
+          onLostPointerCapture={(e) => {
+            if (attackPointerId.current === e.pointerId) releaseAttack();
+          }}
+          className={`min-w-[50px] min-h-[50px] w-13 h-13 sm:w-14 sm:h-14 rounded-full border-2 flex flex-col items-center justify-center transition-transform touch-none ${
             attackPressed ? 'bg-red-700 scale-95' : 'bg-red-800/90'
           }`}
           style={{ borderColor: accentHex }}
@@ -306,7 +370,7 @@ const PlayerTouchZone: React.FC<PlayerPadProps> = ({
   );
 
   return (
-    <div className="flex items-end justify-between gap-2 w-full">
+    <div className="flex items-end justify-between gap-1.5 sm:gap-2 w-full">
       {alignRight ? (
         <>
           {actionsBlock}
@@ -342,8 +406,8 @@ export const DualTouchControls: React.FC<DualTouchControlsProps> = ({
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-30 pointer-events-none grid grid-cols-2 gap-3 sm:gap-6 px-2.5 sm:px-5 pb-3 touch-game-surface"
-      style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
+      className="fixed inset-x-0 bottom-0 z-30 pointer-events-none grid grid-cols-2 gap-2 sm:gap-6 px-2 sm:px-5 pb-2.5 sm:pb-3 touch-game-surface"
+      style={{ paddingBottom: 'max(0.625rem, env(safe-area-inset-bottom))' }}
     >
       {/* Left Half: J1 (Amber) */}
       <PlayerTouchZone

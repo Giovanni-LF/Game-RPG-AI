@@ -1,0 +1,58 @@
+{
+  "blessings": [
+    {
+      "id": "vitality",
+      "name": "Vitalidad Ancestral",
+      "description": "Aumenta tu vida máxima inicial en cada incursión.",
+      "maxLevel": 6,
+      "baseCost": 12,
+      "costStep": 10,
+      "bonusPerLevelLabel": "+15 Vida máxima"
+    },
+    {
+      "id": "might",
+      "name": "Temple del Eclipse",
+      "description": "Potencia todo tu daño físico y poder arcano base.",
+      "maxLevel": 6,
+      "baseCost": 15,
+      "costStep": 12,
+      "bonusPerLevelLabel": "+4 Daño y +4 Arcano"
+    },
+    {
+      "id": "alacrity",
+      "name": "Paso de Ceniza",
+      "description": "Incrementa tu agilidad de desplazamiento y acelera enfriamientos.",
+      "maxLevel": 5,
+      "baseCost": 14,
+      "costStep": 12,
+      "bonusPerLevelLabel": "+6 Vel. mov. · +3% Red. CD"
+    },
+    {
+      "id": "fortune",
+      "name": "Ojo de Reliquia",
+      "description": "Mejora la rareza del botín encontrado y los Fragmentos de Alma obtenidos.",
+      "maxLevel": 5,
+      "baseCost": 16,
+      "costStep": 14,
+      "bonusPerLevelLabel": "+12% Botín y Almas"
+    },
+    {
+      "id": "flask",
+      "name": "Frasco Carmesí Reforzado",
+      "description": "Aumenta la curación de tus frascos y añade cargas máximas en niveles altos.",
+      "maxLevel": 4,
+      "baseCost": 18,
+      "costStep": 15,
+      "bonusPerLevelLabel": "+8% Curación (+1 carga nv. 2 y 4)"
+    }
+  ],
+  "scaling": {
+    "vitalityHpPerLevel": 15,
+    "mightDamagePerLevel": 4,
+    "mightArcanePerLevel": 4,
+    "alacritySpeedPerLevel": 6,
+    "alacrityCdrPerLevel": 0.03,
+    "flaskBaseHealPct": 0.36,
+    "flaskHealPctPerLevel": 0.08
+  }
+}

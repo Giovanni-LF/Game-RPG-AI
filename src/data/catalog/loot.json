@@ -1,0 +1,61 @@
+{
+  "weaponTemplates": [
+    {
+      "kind": "greatsword",
+      "names": ["Espadón de Cripta", "Hoja del Verdugo", "Mandoble de Eclipse", "Quebrantahuesos"],
+      "desc": "Barrido pesado de largo alcance capaz de golpear múltiples enemigos."
+    },
+    {
+      "kind": "daggers",
+      "names": ["Dagas de Obsidiana", "Colmillos Umbríos", "Garras de Ceniza", "Filos Gemelos"],
+      "desc": "Ataques dobles ultrarrápidos con alta probabilidad crítica."
+    },
+    {
+      "kind": "staff",
+      "names": ["Báculo del Vacío", "Cetro de Almas", "Vara de Eclipse", "Orbe Profano"],
+      "desc": "Proyecta descargas arcanas de medio-largo alcance que potencian hechizos."
+    },
+    {
+      "kind": "halberd",
+      "names": ["Alabarda Sepulcral", "Guja de Hierro", "Pica del Guardián", "Lanza de Basalto"],
+      "desc": "Alcance extendido ideal para mantener a raya a bestias y esqueletos."
+    },
+    {
+      "kind": "scythe",
+      "names": ["Guadaña Lunar", "Segadora Carmesí", "Hoz del Osario", "Filo del Ocaso"],
+      "desc": "Arco amplio con afinidad híbrida física y arcana."
+    }
+  ],
+  "relicNames": [
+    "Sello del Osario",
+    "Anillo de Brasa",
+    "Amuleto del Eclipse",
+    "Corazón de Basalto",
+    "Cáliz de Sangre Fría",
+    "Talismán Espectral"
+  ],
+  "rarityPrefixes": {
+    "common": ["Desgastado", "Antiguo", "Forjado"],
+    "rare": ["Rúnico", "Templado", "Sombreado"],
+    "epic": ["Maldito", "Carmesí", "Abisal"],
+    "relic": ["Eterno", "Soberano", "Primordial"]
+  },
+  "rarityColors": {
+    "common": "#949BA8",
+    "rare": "#38BDF8",
+    "epic": "#A855F7",
+    "relic": "#F59E0B"
+  },
+  "rarityLabels": {
+    "common": "Común",
+    "rare": "Raro",
+    "epic": "Épico",
+    "relic": "Reliquia"
+  },
+  "rarityMultipliers": {
+    "common": 1.0,
+    "rare": 1.3,
+    "epic": 1.65,
+    "relic": 2.15
+  }
+}

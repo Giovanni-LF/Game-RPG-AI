@@ -1,16 +1,24 @@
 import React from 'react';
-import { X } from 'lucide-react';
+import { Save, X } from 'lucide-react';
 import altarArt from '../assets/images/altar_sanctum_art_1794586357332.jpg';
 import { ETERNAL_BLESSINGS, getBlessingCost } from '../data/gameData';
 import { BlessingId, MetaSaveData } from '../types/game';
 
 interface AltarModalProps {
   meta: MetaSaveData;
+  activeSlotName?: string;
   onBuyBlessing: (id: BlessingId) => void;
+  onOpenSaveManager?: () => void;
   onClose: () => void;
 }
 
-export const AltarModal: React.FC<AltarModalProps> = ({ meta, onBuyBlessing, onClose }) => {
+export const AltarModal: React.FC<AltarModalProps> = ({
+  meta,
+  activeSlotName,
+  onBuyBlessing,
+  onOpenSaveManager,
+  onClose,
+}) => {
   return (
     <div className="fixed inset-0 z-40 bg-black/80 flex items-center justify-center sm:p-4 md:p-8">
       <div className="w-full max-w-5xl h-[100dvh] sm:h-auto sm:max-h-[90dvh] bg-[#12151C] sm:border border-[#2C3344] sm:rounded-lg overflow-hidden grid grid-cols-1 lg:grid-cols-12">
@@ -44,19 +52,35 @@ export const AltarModal: React.FC<AltarModalProps> = ({ meta, onBuyBlessing, onC
 
         {/* Right Blessings & Run History */}
         <div className="lg:col-span-7 flex flex-col min-h-0 flex-1">
-          <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-[#232836]">
-            <div>
-              <h3 className="font-display text-base sm:text-lg font-bold text-[#E5E0D5]">Bendiciones Permanentes</h3>
-              <p className="text-xs text-[#949BA8]">Se aplican automáticamente al inicio de cada partida</p>
+          <div className="flex items-center justify-between gap-2 px-4 sm:px-6 py-3.5 border-b border-[#232836]">
+            <div className="min-w-0">
+              <h3 className="font-display text-base sm:text-lg font-bold text-[#E5E0D5]">
+                Bendiciones Permanentes
+              </h3>
+              <p className="text-xs text-[#949BA8] truncate">
+                {activeSlotName ? `Crónica activa: ${activeSlotName}` : 'Se aplican automáticamente al inicio de cada partida'}
+              </p>
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Cerrar altar"
-              className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[#949BA8] hover:text-white rounded-md hover:bg-[#1C212D] transition-colors cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              {onOpenSaveManager && (
+                <button
+                  type="button"
+                  onClick={onOpenSaveManager}
+                  className="min-h-[40px] px-3 py-1.5 text-xs font-medium text-[#E5E0D5] bg-[#181C26] hover:bg-[#222836] border border-[#2C3344] rounded-md inline-flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Save className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="hidden sm:inline">Ranuras</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Cerrar altar"
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[#949BA8] hover:text-white rounded-md hover:bg-[#1C212D] transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           <div className="p-4 sm:p-6 space-y-6 overflow-y-auto crypt-scroll flex-1">
